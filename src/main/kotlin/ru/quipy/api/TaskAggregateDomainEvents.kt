@@ -2,6 +2,7 @@ package ru.quipy.api
 
 import ru.quipy.core.annotations.DomainEvent
 import ru.quipy.domain.Event
+import java.time.Duration
 import java.util.UUID
 
 
@@ -27,7 +28,7 @@ class TaskCreatedEvent(
         val taskId: UUID,
         val taskName: String,
         val statusId: UUID,
-        val description: String,
+        val description: String?,
         createdAt: Long = System.currentTimeMillis(),
 ) : Event<TaskAggregate>(
     name = TASK_CREATED_EVENT,
@@ -48,6 +49,9 @@ class TaskDeletedEvent(
 class TaskNameChangeEvent(
     val taskId: UUID,
     val taskName: String,
+    val duration : Duration,
+    val description : String,
+    val status : UUID,
     createdAt: Long = System.currentTimeMillis(),
 ) : Event<TaskAggregate>(
     name = CHANGE_NAME_TASK_IN_PROJECT,

@@ -16,14 +16,14 @@ fun ProjectAggregateState.create(id: UUID, title: String, creatorId: String): Pr
 }
 
 fun ProjectAggregateState.createTag(name: String): TagCreatedEvent {
-    if (projectTags.values.any { it.name == name }) {
+    if (taskStatuses.values.any { it.name == name }) {
         throw IllegalArgumentException("Tag already exists: $name")
     }
     return TagCreatedEvent(projectId = this.getId(), tagId = UUID.randomUUID(), tagName = name)
 }
 
 fun ProjectAggregateState.assignTagToTask(tagId: UUID, taskId: UUID, oldTagId: UUID): TagAssignedToTaskEvent {
-    if (!projectTags.containsKey(tagId)) {
+    if (!taskStatuses.containsKey(tagId)) {
         throw IllegalArgumentException("Tag doesn't exists: $tagId")
     }
 
@@ -39,17 +39,17 @@ fun ProjectAggregateState.assignTaskToProject(taskId: UUID,): TaskAssignedToProj
 }
 
 fun ProjectAggregateState.addUser(userId: UUID): AddUserToProjectEvent {
-    if(participants.containsKey(userId)){
+    if(members.containsKey(userId)){
         throw IllegalArgumentException("User with id: $userId already exists in project")
     }
     return AddUserToProjectEvent(projectId = this.getId(), userId = userId)
 }
 
 fun ProjectAggregateState.deleteTag(tagId: UUID): DeleteTagEvent{
-    if(!projectTags.containsKey(tagId)){
+    if(!taskStatuses.containsKey(tagId)){
         throw IllegalArgumentException("Tag doesn't exists: $tagId")
     }
-    val tag = projectTags.get(tagId)
+    val tag = taskStatuses.get(tagId)
     if(tag?.count!! > 0){
         throw IllegalArgumentException("Tag have tasks:")
     }
@@ -57,10 +57,10 @@ fun ProjectAggregateState.deleteTag(tagId: UUID): DeleteTagEvent{
 }
 
 fun ProjectAggregateState.changeTag(tagId: UUID, tagName: String): ChangeTagEvent{
-    if(!projectTags.containsKey(tagId)){
+    if(!taskStatuses.containsKey(tagId)){
         throw IllegalArgumentException("Tag doesn't exists: $tagId")
     }
-    if(projectTags.values.any { it.name == tagName }){
+    if(taskStatuses.values.any { it.name == tagName }){
         throw IllegalArgumentException("Tag already exists: $tagName")
     }
     return ChangeTagEvent(projectId = this.getId(), tagId = tagId, tagName = tagName)

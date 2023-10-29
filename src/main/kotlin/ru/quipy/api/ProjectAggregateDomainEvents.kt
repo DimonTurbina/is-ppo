@@ -2,7 +2,7 @@ package ru.quipy.api
 
 import ru.quipy.core.annotations.DomainEvent
 import ru.quipy.domain.Event
-import ru.quipy.logic.TagEntity.Companion.DEFAULT_TAG
+import ru.quipy.logic.StatusEntity.Companion.DEFAULT_TAG
 import java.util.*
 
 const val PROJECT_CREATED_EVENT = "PROJECT_CREATED_EVENT"

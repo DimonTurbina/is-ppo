@@ -10,7 +10,7 @@ const val CHANGE_STATUS_USER = "CHANGE_STATUS_USER"
 class ChangeStatusUserEvent(
         val userId: UUID,
         val login: String,
-        val securePassword: String,
+        val password: String,
         val userName: String,
         val projects: MutableSet<UUID>,
         createdAt: Long = System.currentTimeMillis(),

@@ -12,7 +12,6 @@ class TaskAggregateState : AggregateState<UUID, TaskAggregate>{
     lateinit var name: String
     lateinit var description: String
     lateinit var status: UUID
-    lateinit var projectId: UUID
     lateinit var duration: Duration
 
 
@@ -22,16 +21,18 @@ class TaskAggregateState : AggregateState<UUID, TaskAggregate>{
     @StateTransitionFunc
     fun createTask(event: TaskCreatedEvent){
         taskId = event.taskId
-        projectId = event.projectId
         name = event.taskName
-        description = event.description
+        description = event.description ?: ""
         status = event.statusId
     }
 
     @StateTransitionFunc
     fun changeTask(event: TaskNameChangeEvent){
         name = event.taskName
-        updatedAt = createdAt
+        updatedAt = event.createdAt
+        duration = event.duration
+        description = event.description
+        status = event.status
     }
 
     @StateTransitionFunc

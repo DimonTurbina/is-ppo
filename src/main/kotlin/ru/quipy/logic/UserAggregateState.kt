@@ -12,7 +12,7 @@ class UserAggregateState : AggregateState<UUID, UserAggregate> {
     var updatedAt: Long = System.currentTimeMillis()
 
     lateinit var login: String
-    lateinit var securePassword: String
+    lateinit var password: String
     lateinit var name: String
     lateinit var projects: MutableSet<UUID>
     override fun getId() = userId
@@ -21,7 +21,7 @@ class UserAggregateState : AggregateState<UUID, UserAggregate> {
     fun userCreatedApply(event: ChangeStatusUserEvent) {
         userId = event.userId
         login = event.login
-        securePassword = event.securePassword
+        password = event.password
         name = event.userName
         projects = event.projects
         updatedAt = createdAt

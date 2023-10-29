@@ -1,6 +1,7 @@
 package ru.quipy.logic
 
 import ru.quipy.api.*
+import java.time.Duration
 import java.util.UUID
 
 fun TaskAggregateState.createTask(projectId: UUID,
@@ -16,11 +17,11 @@ fun TaskAggregateState.deleteTask(projectId: UUID,
     return  TaskDeletedEvent(projectId = projectId, taskId = taskId)
 }
 
-fun TaskAggregateState.changeTask(taskId: UUID, taskName: String) : TaskNameChangeEvent {
+fun TaskAggregateState.changeTask(taskId: UUID, taskName: String, duration: Duration, description: String, status : UUID) : TaskNameChangeEvent {
     if (name == taskName) {
         throw IllegalArgumentException("Task with this name already exists: $taskName")
     }
-    return TaskNameChangeEvent(taskId = taskId, taskName = taskName)
+    return TaskNameChangeEvent(taskId = taskId, taskName = taskName, duration = duration, description = description, status = status)
 }
 
 fun TaskAggregateState.addUser(userId: UUID, taskId: UUID) : ListExecutorsUpdatedEvent {

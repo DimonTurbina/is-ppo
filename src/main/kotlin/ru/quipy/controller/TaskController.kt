@@ -5,6 +5,7 @@ import ru.quipy.api.*
 import ru.quipy.core.EventSourcingService
 import ru.quipy.logic.*
 import java.lang.IllegalArgumentException
+import java.time.Duration
 import java.util.*
 
 @RestController
@@ -17,8 +18,8 @@ class TaskController(
     fun createTask(@PathVariable projectId: UUID, @PathVariable taskName: String, @RequestParam description: String) : TaskCreatedEvent {
         val proj = projectEsService.getState(projectId)
             ?: throw IllegalArgumentException("No such project: $projectId")
-        val taskStatus = proj.projectTags.entries
-            .filter { it.value.name == TagEntity.DEFAULT_TAG }
+        val taskStatus = proj.taskStatuses.entries
+            .filter { it.value.name == StatusEntity.DEFAULT_TAG }
             .map { it.key }
 
         val taskId = UUID.randomUUID()
@@ -39,10 +40,10 @@ class TaskController(
         return taskEsService.create { it.deleteTask(projectId, taskId) }
     }
 
-    @PostMapping("/{projectId}/{taskId}/changeTask/{newName}")
-    fun changeTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID, @PathVariable newName: String) : TaskNameChangeEvent? {
+    @PostMapping("/{projectId}/{taskId}/changeTask/{newName}{duration}{description}{status}")
+    fun changeTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID, @PathVariable newName: String, @PathVariable duration: Duration, @PathVariable description: String, @PathVariable status : UUID) : TaskNameChangeEvent? {
         return taskEsService.update(taskId){
-            it.changeTask(taskId, newName)
+            it.changeTask(taskId, newName, duration, description, status)
         }
     }
 
