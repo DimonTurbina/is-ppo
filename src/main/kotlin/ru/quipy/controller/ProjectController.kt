@@ -37,7 +37,7 @@ class ProjectController(
             ?: throw IllegalArgumentException("No such task: $taskId")
         val project = projectEsService.getState(projectId)
             ?: throw IllegalArgumentException("No such project: $projectId")
-        if(project.projectStatus.containsKey(statusId)) {
+        if(project.projectStatuses.containsKey(statusId)) {
             projectEsService.update(projectId) {
                 it.assignStatusToTask(statusId, task.status)
             }
