@@ -23,49 +23,49 @@ class ProjectController(
         return projectEsService.getState(projectId)
     }
 
-    @PostMapping("/{projectId}/tags/createTag/{tagName}")
-    fun createTag(@PathVariable projectId: UUID, @PathVariable tagName: String) : TagCreatedEvent{
+    @PostMapping("/{projectId}/statuses/createStatus/{statusName}")
+    fun createStatus(@PathVariable projectId: UUID, @PathVariable statusName: String) : StatusCreatedEvent{
         return projectEsService.update(projectId) {
-            it.createTag(tagName)
+            it.createStatus(statusName)
         }
     }
 
-    @PostMapping("/{projectId}/{taskId}/addTag/{tagId}")
-    fun assignTagToTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID, @PathVariable tagId: UUID):
-            AssignedTagToTaskEvent {
+    @PostMapping("/{projectId}/{taskId}/addStatus/{statusId}")
+    fun assignStatusToTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID, @PathVariable statusId: UUID):
+            StatusAssignedToTaskEvent {
         val task = taskEsService.getState(taskId)
             ?: throw IllegalArgumentException("No such task: $taskId")
         val project = projectEsService.getState(projectId)
             ?: throw IllegalArgumentException("No such project: $projectId")
-        if(project.projectTags.containsKey(tagId)) {
+        if(project.projectStatus.containsKey(statusId)) {
             projectEsService.update(projectId) {
-                it.assignTagToTask(tagId, task.status)
+                it.assignStatusToTask(statusId, task.status)
             }
             return taskEsService.update(taskId) {
-                it.tagAssignedToTaskEvent(projectId, taskId, tagId)
+                it.statusAssignedToTaskEvent(projectId, taskId, statusId)
             }
         }
         else{
-            throw IllegalArgumentException("No such tag: $tagId")
+            throw IllegalArgumentException("No such status: $statusId")
         }
     }
 
-    @DeleteMapping("/{projectId}/tags/deleteTag/{tagId}")
-    fun deleteTag(@PathVariable projectId: UUID, @PathVariable tagId: UUID) : DeleteTagEvent{
+    @DeleteMapping("/{projectId}/statuses/deleteStatus/{statusId}")
+    fun deleteStatus(@PathVariable projectId: UUID, @PathVariable statusId: UUID) : StatusDeletedEvent{
         return projectEsService.update(projectId) {
-            it.deleteTag(tagId)
+            it.deleteStatus(statusId)
         }
     }
 
-    @PostMapping("/{projectId}/tags/changeTag/{tagId}/{newTagName}")
-    fun changeTag(@PathVariable projectId: UUID, @PathVariable tagId: UUID, @PathVariable newTagName: String) : ChangeTagEvent{
+    @PostMapping("/{projectId}/statuses/changeStatus/{statusId}/{newStatusName}")
+    fun changeStatus(@PathVariable projectId: UUID, @PathVariable statusId: UUID, @PathVariable newStatusName: String) : StatusChangedEvent{
         return projectEsService.update(projectId) {
-            it.changeTag(tagId, newTagName)
+            it.changeStatus(statusId, newStatusName)
         }
     }
 
     @PostMapping("/{projectId}/addUser/{userId}")
-    fun addUser(@PathVariable projectId: UUID, @PathVariable userId: UUID) : AddUserToProjectEvent{
+    fun addUser(@PathVariable projectId: UUID, @PathVariable userId: UUID) : UserAddedToProjectEvent{
         return projectEsService.update(projectId){
             it.addUser(userId)
         }

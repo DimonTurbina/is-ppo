@@ -6,27 +6,27 @@ import java.util.UUID
 fun TaskAggregateState.createTask(projectId: UUID,
                                   taskId: UUID,
                                   taskName: String,
-                                  tagId: UUID,
+                                  statusId: UUID,
                                   description: String): TaskCreatedEvent{
-    return  TaskCreatedEvent(projectId = projectId, taskId = taskId, description = description, tagId = tagId, taskName = taskName)
+    return  TaskCreatedEvent(projectId = projectId, taskId = taskId, description = description, statusId = statusId, taskName = taskName)
 }
-fun TaskAggregateState.changeTask(taskId: UUID, taskName: String) : TaskNameChangeEvent {
+fun TaskAggregateState.changeTask(taskId: UUID, taskName: String) : TaskNameChangedEvent {
     if (name == taskName) {
         throw IllegalArgumentException("Task with this name already exists: $taskName")
     }
-    return TaskNameChangeEvent(taskId = taskId, taskName = taskName)
+    return TaskNameChangedEvent(taskId = taskId, taskName = taskName)
 }
 
-fun TaskAggregateState.addUser(userId: UUID, taskId: UUID) : ListExecutorsUpdatedEvent {
+fun TaskAggregateState.addUser(userId: UUID, taskId: UUID) : ExecutorsUpdatedEvent {
     if(executors.contains(userId)){
         throw IllegalArgumentException("User already exists: $userId")
     }
-        return ListExecutorsUpdatedEvent(userId = userId, taskId = taskId)
+        return ExecutorsUpdatedEvent(userId = userId, taskId = taskId)
 }
 
-fun TaskAggregateState.tagAssignedToTaskEvent(projectId: UUID, taskId: UUID, tagId: UUID): AssignedTagToTaskEvent {
-    if(status == tagId){
-        throw IllegalArgumentException("tag already exists: $tagId")
+fun TaskAggregateState.statusAssignedToTaskEvent(projectId: UUID, taskId: UUID, statusId: UUID): StatusAssignedToTaskEvent {
+    if(status == statusId){
+        throw IllegalArgumentException("Status already exists: $statusId")
     }
-    return AssignedTagToTaskEvent(projectId = projectId, taskId = taskId, tagId = tagId)
+    return StatusAssignedToTaskEvent(projectId = projectId, taskId = taskId, statusId = statusId)
 }

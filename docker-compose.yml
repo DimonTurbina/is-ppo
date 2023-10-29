@@ -19,6 +19,8 @@ services:
     container_name: ppo_task_manager
     restart: on-failure
     build: .
+    environment:
+      - SPRING_DATA_MONGODB_HOST=mongodb
     depends_on:
       - mongodb
     ports:
@@ -29,7 +31,9 @@ services:
 networks:
   ppo_netowrk:
     name: ppo_netowrk
+    external: true
 
 volumes:
   ppo_mongo_data:
     name: ppo_mongo_data
+    external: true

@@ -5,18 +5,18 @@ import ru.quipy.domain.Event
 import java.util.UUID
 
 
-const val LIST_EXECUTORS_UPDATE = "LIST_EXECUTORS_UPDATE"
-const val CHANGE_NAME_TASK_IN_PROJECT = "CHANGE_NAME_TASK_IN_PROJECT"
+const val EXECUTORS_UPDATED_EVENT = "EXECUTORS_UPDATED_EVENT"
+const val TASK_NAME_CHANGED_EVENT = "TASK_NAME_CHANGED_EVENT"
 const val TASK_CREATED_EVENT = "TASK_CREATED_EVENT"
-const val ASSIGNED_TAG_TO_TASK_EVENT = "ASSIGNED_TAG_TO_TASK_EVENT"
+const val STATUS_ASSIGNED_TO_TASK_EVENT = "STATUS_ASSIGNED_TO_TASK_EVENT"
 
-@DomainEvent(name = LIST_EXECUTORS_UPDATE)
-class ListExecutorsUpdatedEvent(
+@DomainEvent(name = EXECUTORS_UPDATED_EVENT)
+class ExecutorsUpdatedEvent(
     val userId: UUID,
     val taskId: UUID,
     createdAt: Long = System.currentTimeMillis(),
 ) : Event<TaskAggregate>(
-    name = LIST_EXECUTORS_UPDATE,
+    name = EXECUTORS_UPDATED_EVENT,
     createdAt = createdAt,
 )
 
@@ -25,7 +25,7 @@ class TaskCreatedEvent(
     val projectId: UUID,
     val taskId: UUID,
     val taskName: String,
-    val tagId: UUID,
+    val statusId: UUID,
     val description: String,
     createdAt: Long = System.currentTimeMillis(),
 ) : Event<TaskAggregate>(
@@ -33,23 +33,23 @@ class TaskCreatedEvent(
     createdAt = createdAt
 )
 
-@DomainEvent(name = CHANGE_NAME_TASK_IN_PROJECT)
-class TaskNameChangeEvent(
+@DomainEvent(name = TASK_NAME_CHANGED_EVENT)
+class TaskNameChangedEvent(
     val taskId: UUID,
     val taskName: String,
     createdAt: Long = System.currentTimeMillis(),
 ) : Event<TaskAggregate>(
-    name = CHANGE_NAME_TASK_IN_PROJECT,
+    name = TASK_NAME_CHANGED_EVENT,
     createdAt = createdAt,
 )
 
-@DomainEvent(name = ASSIGNED_TAG_TO_TASK_EVENT)
-class AssignedTagToTaskEvent(
+@DomainEvent(name = STATUS_ASSIGNED_TO_TASK_EVENT)
+class StatusAssignedToTaskEvent(
     val projectId: UUID,
     val taskId: UUID,
-    val tagId: UUID,
+    val statusId: UUID,
     createdAt: Long = System.currentTimeMillis(),
 ) : Event<TaskAggregate>(
-    name = ASSIGNED_TAG_TO_TASK_EVENT,
+    name = STATUS_ASSIGNED_TO_TASK_EVENT,
     createdAt = createdAt
 )

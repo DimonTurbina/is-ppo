@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import ru.quipy.api.ProjectAggregate
-import ru.quipy.api.TagCreatedEvent
+import ru.quipy.api.StatusCreatedEvent
 import ru.quipy.streams.AggregateSubscriptionsManager
 import javax.annotation.PostConstruct
 
@@ -21,8 +21,8 @@ class ProjectEventsSubscriber {
     fun init() {
         subscriptionsManager.createSubscriber(ProjectAggregate::class, "some-meaningful-name") {
 
-            `when`(TagCreatedEvent::class) { event ->
-                logger.info("Tag created: {}", event.tagName)
+            `when`(StatusCreatedEvent::class) { event ->
+                logger.info("Status created: {}", event.statusName)
             }
         }
     }

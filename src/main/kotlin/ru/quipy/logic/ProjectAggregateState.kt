@@ -3,7 +3,6 @@ package ru.quipy.logic
 import ru.quipy.api.*
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
-import ru.quipy.logic.TagEntity.Companion.DEFAULT_TAG
 import java.lang.IllegalArgumentException
 import java.util.*
 
@@ -15,8 +14,8 @@ class ProjectAggregateState : AggregateState<UUID, ProjectAggregate> {
 
     lateinit var projectTitle: String
     lateinit var creatorId: String
-    val projectTags: MutableMap<UUID, TagEntity> = mutableMapOf()
-    var participants = mutableMapOf<UUID, UserEntity>()
+    val projectStatuses: MutableMap<UUID, StatusEntity> = mutableMapOf()
+    var members = mutableMapOf<UUID, UserEntity>()
 
     override fun getId() = projectId
 
@@ -26,31 +25,31 @@ class ProjectAggregateState : AggregateState<UUID, ProjectAggregate> {
         projectId = event.projectId
         projectTitle = event.title
         creatorId = event.creatorId
-        val taskTag = TagEntity(event.defaultTagId, event.defaultTagName, 0)
-        projectTags[taskTag.id] = taskTag
+        val taskStatus = StatusEntity(event.defaultStatusId, event.defaultStatusName, 0)
+        projectStatuses[taskStatus.id] = taskStatus
         updatedAt = createdAt
     }
 
     @StateTransitionFunc
-    fun tagCreatedApply(event: TagCreatedEvent) {
-        projectTags[event.tagId] = TagEntity(event.tagId, event.tagName, 0)
+    fun statusCreatedApply(event: StatusCreatedEvent) {
+        projectStatuses[event.statusId] = StatusEntity(event.statusId, event.statusName, 0)
         updatedAt = createdAt
     }
 
     @StateTransitionFunc
-    fun addUser(event: AddUserToProjectEvent){
-            participants[event.userId] = UserEntity(event.userId)
+    fun addUser(event: UserAddedToProjectEvent){
+            members[event.userId] = UserEntity(event.userId)
             updatedAt = createdAt
     }
     @StateTransitionFunc
-    fun changeTag(event: ChangeTagEvent){
-        val count = projectTags[event.tagId]?.count
-        projectTags[event.tagId] = TagEntity(event.tagId, event.tagName, count)
+    fun changeStatus(event: StatusChangedEvent){
+        val count = projectStatuses[event.statusId]?.count
+        projectStatuses[event.statusId] = StatusEntity(event.statusId, event.statusName, count)
         updatedAt = createdAt
     }
     @StateTransitionFunc
-    fun deleteTag(event: DeleteTagEvent){
-        projectTags.remove(event.tagId)
+    fun deleteStatus(event: StatusDeletedEvent){
+        projectStatuses.remove(event.statusId)
         updatedAt = createdAt
     }
 }
@@ -58,16 +57,16 @@ class ProjectAggregateState : AggregateState<UUID, ProjectAggregate> {
 data class TaskEntity(
     val id: UUID = UUID.randomUUID(),
     val name: String,
-    val tagsAssigned: MutableSet<UUID>?
+    val statusAssigned: MutableSet<UUID>?
 )
 
-data class TagEntity(
+data class StatusEntity(
     val id: UUID = UUID.randomUUID(),
     val name: String,
     var count: Int?
 ){
     companion object {
-        const val DEFAULT_TAG = "CREATED"
+        const val DEFAULT_STATUS_NAME = "CREATED"
     }
 }
 
@@ -78,14 +77,14 @@ data class UserEntity(
  * Demonstrates that the transition functions might be representer by "extension" functions, not only class members functions
  */
 @StateTransitionFunc
-fun ProjectAggregateState.tagAssignedApply(event: TagAssignedToTaskEvent) {
-    val key = projectTags.get(event.tagId)
-        ?: throw IllegalArgumentException("No such tag: ${event.tagId}")
+fun ProjectAggregateState.statusAssignedApply(event: StatusAssignedEvent) {
+    val key = projectStatuses.get(event.statusId)
+        ?: throw IllegalArgumentException("No such status: ${event.statusId}")
     key.count = key.count?.plus(1)
-    if(event.oldTagId == null){
+    if(event.oldStatusId == null){
         return
     }
-    val key2 = projectTags.get(event.oldTagId)
-        ?: throw IllegalArgumentException("No such tag: ${event.oldTagId}")
+    val key2 = projectStatuses.get(event.oldStatusId)
+        ?: throw IllegalArgumentException("No such status: ${event.oldStatusId}")
         key2.count = key2.count?.minus(1)
 }

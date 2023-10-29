@@ -22,23 +22,23 @@ class TaskAggregateState : AggregateState<UUID, TaskAggregate>{
         projectId = event.projectId
         name = event.taskName
         description = event.description
-        status = event.tagId
+        status = event.statusId
     }
 
     @StateTransitionFunc
-    fun changeTask(event: TaskNameChangeEvent){
+    fun changeTask(event: TaskNameChangedEvent){
         name = event.taskName
         updatedAt = createdAt
     }
 
     @StateTransitionFunc
-    fun addUser(event: ListExecutorsUpdatedEvent){
+    fun addUser(event: ExecutorsUpdatedEvent){
         executors.add(event.userId)
         updatedAt = createdAt
     }
 
     @StateTransitionFunc
-    fun tagAssignedToTaskEvent(event: AssignedTagToTaskEvent){
-        status = event.tagId
+    fun statusAssignedToTaskEvent(event: StatusAssignedToTaskEvent){
+        status = event.statusId
     }
 }

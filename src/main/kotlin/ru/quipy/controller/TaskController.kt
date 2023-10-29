@@ -17,24 +17,24 @@ class TaskController(
     fun createTask(@PathVariable projectId: UUID, @PathVariable taskName: String, @RequestParam description: String) : TaskCreatedEvent {
         val proj = projectEsService.getState(projectId)
             ?: throw IllegalArgumentException("No such project: $projectId")
-        val taskStatus = proj.projectTags.entries
-            .filter { it.value.name == TagEntity.DEFAULT_TAG }
+        val taskStatus = proj.projectStatuses.entries
+            .filter { it.value.name == StatusEntity.DEFAULT_STATUS_NAME }
             .map { it.key }
         projectEsService.update(projectId) {
-            it.assignTagToTask(taskStatus.first(), null)
+            it.assignStatusToTask(taskStatus.first(), null)
         }
         return taskEsService.create { it.createTask(projectId, UUID.randomUUID(), taskName, taskStatus.first(), description) }
     }
 
     @PostMapping("/{projectId}/{taskId}/changeTask/{newName}")
-    fun changeTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID, @PathVariable newName: String) : TaskNameChangeEvent? {
+    fun changeTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID, @PathVariable newName: String) : TaskNameChangedEvent? {
         return taskEsService.update(taskId){
             it.changeTask(taskId, newName)
         }
     }
 
     @PostMapping("/{taskId}/addUser/{userId}")
-    fun addUser(@PathVariable taskId: UUID, @PathVariable userId: UUID) : ListExecutorsUpdatedEvent?{
+    fun addUser(@PathVariable taskId: UUID, @PathVariable userId: UUID) : ExecutorsUpdatedEvent?{
         return taskEsService.update(taskId){
             it.addUser(userId, taskId)
         }
