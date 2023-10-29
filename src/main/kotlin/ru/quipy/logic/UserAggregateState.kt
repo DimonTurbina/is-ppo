@@ -13,8 +13,6 @@ class UserAggregateState : AggregateState<UUID, UserAggregate> {
 
     lateinit var login: String
     lateinit var password: String
-    lateinit var name: String
-    lateinit var projects: MutableSet<UUID>
     override fun getId() = userId
 
     @StateTransitionFunc
@@ -22,8 +20,6 @@ class UserAggregateState : AggregateState<UUID, UserAggregate> {
         userId = event.userId
         login = event.login
         password = event.password
-        name = event.userName
-        projects = event.projects
         updatedAt = createdAt
     }
 

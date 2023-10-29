@@ -5,7 +5,6 @@ import ru.quipy.api.*
 import ru.quipy.core.EventSourcingService
 import ru.quipy.logic.*
 import java.lang.IllegalArgumentException
-import java.time.Duration
 import java.util.*
 
 @RestController
@@ -18,32 +17,19 @@ class TaskController(
     fun createTask(@PathVariable projectId: UUID, @PathVariable taskName: String, @RequestParam description: String) : TaskCreatedEvent {
         val proj = projectEsService.getState(projectId)
             ?: throw IllegalArgumentException("No such project: $projectId")
-        val taskStatus = proj.taskStatuses.entries
-            .filter { it.value.name == StatusEntity.DEFAULT_TAG }
+        val taskStatus = proj.projectTags.entries
+            .filter { it.value.name == TagEntity.DEFAULT_TAG }
             .map { it.key }
-
-        val taskId = UUID.randomUUID()
-        projectEsService.update(projectId){
-            it.assignTaskToProject(taskId)
+        projectEsService.update(projectId) {
+            it.assignTagToTask(taskStatus.first(), null)
         }
-        proj.tasks.add(taskId)
-        return taskEsService.create { it.createTask(projectId, taskId, taskName, taskStatus.first(), description) }
+        return taskEsService.create { it.createTask(projectId, UUID.randomUUID(), taskName, taskStatus.first(), description) }
     }
 
-    @PostMapping("/{projectId}/tasks/deleteTask/{taskId}")
-    fun deleteTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID) : TaskDeletedEvent {
-        val proj = projectEsService.getState(projectId)
-                ?: throw IllegalArgumentException("No such project: $projectId")
-
-        taskEsService.getState(taskId)
-        proj.tasks.remove(projectId)
-        return taskEsService.create { it.deleteTask(projectId, taskId) }
-    }
-
-    @PostMapping("/{projectId}/{taskId}/changeTask/{newName}{duration}{description}{status}")
-    fun changeTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID, @PathVariable newName: String, @PathVariable duration: Duration, @PathVariable description: String, @PathVariable status : UUID) : TaskNameChangeEvent? {
+    @PostMapping("/{projectId}/{taskId}/changeTask/{newName}")
+    fun changeTask(@PathVariable projectId: UUID, @PathVariable taskId: UUID, @PathVariable newName: String) : TaskNameChangeEvent? {
         return taskEsService.update(taskId){
-            it.changeTask(taskId, newName, duration, description, status)
+            it.changeTask(taskId, newName)
         }
     }
 
@@ -51,13 +37,6 @@ class TaskController(
     fun addUser(@PathVariable taskId: UUID, @PathVariable userId: UUID) : ListExecutorsUpdatedEvent?{
         return taskEsService.update(taskId){
             it.addUser(userId, taskId)
-        }
-    }
-
-    @PostMapping("/{taskId}/removeUser/{userId}")
-    fun removeUser(@PathVariable taskId: UUID, @PathVariable userId: UUID) : ListExecutorsUpdatedEvent?{
-        return taskEsService.update(taskId){
-            it.removeUser(userId, taskId)
         }
     }
 

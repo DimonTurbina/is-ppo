@@ -3,7 +3,7 @@ package ru.quipy.logic
 import ru.quipy.api.*
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
-import ru.quipy.logic.StatusEntity.Companion.DEFAULT_TAG
+import ru.quipy.logic.TagEntity.Companion.DEFAULT_TAG
 import java.lang.IllegalArgumentException
 import java.util.*
 
@@ -15,9 +15,9 @@ class ProjectAggregateState : AggregateState<UUID, ProjectAggregate> {
 
     lateinit var projectTitle: String
     lateinit var creatorId: String
-    val taskStatuses: MutableMap<UUID, StatusEntity> = mutableMapOf()
-    var members = mutableMapOf<UUID, UserEntity>()
-    lateinit var tasks: MutableSet<UUID>
+    val projectTags: MutableMap<UUID, TagEntity> = mutableMapOf()
+    var participants = mutableMapOf<UUID, UserEntity>()
+
     override fun getId() = projectId
 
     // State transition functions which is represented by the class member function
@@ -26,33 +26,31 @@ class ProjectAggregateState : AggregateState<UUID, ProjectAggregate> {
         projectId = event.projectId
         projectTitle = event.title
         creatorId = event.creatorId
-        val taskStatus = StatusEntity(event.defaultTagId, event.defaultTagName, "#0000FF", 0)
-        taskStatuses[taskStatus.id] = taskStatus
+        val taskTag = TagEntity(event.defaultTagId, event.defaultTagName, 0)
+        projectTags[taskTag.id] = taskTag
         updatedAt = createdAt
     }
 
     @StateTransitionFunc
     fun tagCreatedApply(event: TagCreatedEvent) {
-        taskStatuses[event.tagId] = StatusEntity(event.tagId, event.tagName, "#0000FF",0)
+        projectTags[event.tagId] = TagEntity(event.tagId, event.tagName, 0)
         updatedAt = createdAt
     }
 
     @StateTransitionFunc
     fun addUser(event: AddUserToProjectEvent){
-            members[event.userId] = UserEntity(event.userId)
+            participants[event.userId] = UserEntity(event.userId)
             updatedAt = createdAt
     }
-
-
     @StateTransitionFunc
     fun changeTag(event: ChangeTagEvent){
-        val count = taskStatuses[event.tagId]?.count
-        taskStatuses[event.tagId] = StatusEntity(event.tagId, event.tagName, "#0000FF", count)
+        val count = projectTags[event.tagId]?.count
+        projectTags[event.tagId] = TagEntity(event.tagId, event.tagName, count)
         updatedAt = createdAt
     }
     @StateTransitionFunc
     fun deleteTag(event: DeleteTagEvent){
-        taskStatuses.remove(event.tagId)
+        projectTags.remove(event.tagId)
         updatedAt = createdAt
     }
 }
@@ -63,10 +61,9 @@ data class TaskEntity(
     val tagsAssigned: MutableSet<UUID>?
 )
 
-data class StatusEntity(
+data class TagEntity(
     val id: UUID = UUID.randomUUID(),
     val name: String,
-    val color: String,
     var count: Int?
 ){
     companion object {
@@ -82,12 +79,13 @@ data class UserEntity(
  */
 @StateTransitionFunc
 fun ProjectAggregateState.tagAssignedApply(event: TagAssignedToTaskEvent) {
-    val key = taskStatuses.get(event.tagId)
+    val key = projectTags.get(event.tagId)
         ?: throw IllegalArgumentException("No such tag: ${event.tagId}")
     key.count = key.count?.plus(1)
-    val key2 = taskStatuses.get(event.oldTagId)
-        ?: throw IllegalArgumentException("No such tag: ${event.oldTagId}")
-    if(key2.name != DEFAULT_TAG){
-        key2.count = key2.count?.minus(1)
+    if(event.oldTagId == null){
+        return
     }
+    val key2 = projectTags.get(event.oldTagId)
+        ?: throw IllegalArgumentException("No such tag: ${event.oldTagId}")
+        key2.count = key2.count?.minus(1)
 }

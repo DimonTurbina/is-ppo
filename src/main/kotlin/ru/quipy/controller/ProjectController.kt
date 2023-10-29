@@ -35,11 +35,18 @@ class ProjectController(
             AssignedTagToTaskEvent {
         val task = taskEsService.getState(taskId)
             ?: throw IllegalArgumentException("No such task: $taskId")
-        projectEsService.update(projectId)  {
-            it.assignTagToTask(tagId, taskId, task.status)
+        val project = projectEsService.getState(projectId)
+            ?: throw IllegalArgumentException("No such project: $projectId")
+        if(project.projectTags.containsKey(tagId)) {
+            projectEsService.update(projectId) {
+                it.assignTagToTask(tagId, task.status)
+            }
+            return taskEsService.update(taskId) {
+                it.tagAssignedToTaskEvent(projectId, taskId, tagId)
+            }
         }
-        return taskEsService.update(taskId){
-            it.tagAssignedToTaskEvent(projectId, taskId, tagId)
+        else{
+            throw IllegalArgumentException("No such tag: $tagId")
         }
     }
 
