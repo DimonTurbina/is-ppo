@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -63,6 +63,26 @@
 			<artifactId>tiny-mongo-event-store-spring-boot-starter</artifactId>
 			<version>${tiny.es.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.exposed</groupId>
+			<artifactId>exposed-core</artifactId>
+			<version>0.40.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.exposed</groupId>
+			<artifactId>exposed-jdbc</artifactId>
+			<version>0.40.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>9.15.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.6.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -91,6 +111,20 @@
 						<version>${kotlin.version}</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>9.8.1</version>
+
+				<configuration>
+					<user>user</user>
+					<password>secret</password>
+					<url>jdbc:postgresql://localhost:5431/tiny-es</url>
+					<locations>
+						<location>filesystem:src/main/resources/db/migration</location>
+					</locations>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

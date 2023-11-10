@@ -14,15 +14,32 @@ services:
     networks:
       - ppo_netowrk
 
+  postgresql:
+    image: postgres:14
+    container_name: ppo_postgres1
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=tiny-es
+    ports:
+      - 5431:5432
+    volumes:
+      - ppo_postgres_data:/var/lib/postgresql/data
+    networks:
+      - ppo_netowrk
+
   task-manager:
     image: ppo_task_manager
     container_name: ppo_task_manager
     restart: on-failure
-    build: .
     environment:
       - SPRING_DATA_MONGODB_HOST=mongodb
+      - PROJECTION_DATABASE_URL=jdbc:postgresql://postgresql:5432/tiny-es
+    build: .
     depends_on:
       - mongodb
+      - postgresql
     ports:
       - 8080:8080
     networks:
@@ -31,9 +48,9 @@ services:
 networks:
   ppo_netowrk:
     name: ppo_netowrk
-    external: true
 
 volumes:
   ppo_mongo_data:
     name: ppo_mongo_data
-    external: true
+  ppo_postgres_data:
+    name: ppo_postgres_data
